@@ -8,14 +8,19 @@ var passport = require('passport');
 //var authenticate = require('./authenticate');
 var bodyParser = require('body-parser');
 var config = require('./config');
+const cors = require('cors');
+require('dotenv').config();
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var payments = require('./routes/paymentRouter');
+
 var dishRouter = require('./routes/dishRouter');
 var leaderRouter = require('./routes/leaderRouter');
 var promoRouter = require('./routes/promoRouter');
 var favRouter = require('./routes/favouriteRouter');
 var commentRouter = require('./routes/commentRouter')
+var paymentRouter = require('./routes/bikashPaymentRoute');
 var uploadRouter = require('./routes/uploadRouter');
 
 const mongoose = require('mongoose');
@@ -32,8 +37,16 @@ connect.then((db) => {
     console.log("Connection OK!");
 }, (err) => { console.log(err); });
 
+const corsOptions = {
+  origin: 'http://localhost:3001', // Replace with the origin of your client application
+  credentials: true, // Allow sending cookies and other credentials with the request
+  optionsSuccessStatus: 200 // Set the successful response status code for preflight requests
+};
+
 
 var app = express();
+
+app.use(cors(corsOptions));
 
 app.all('*', (req, res, next) => {
   if (req.secure) {
@@ -59,27 +72,29 @@ app.use(passport.initialize());
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/payments', payments);
 
-app.options('/users/login', (req, res) => {
+/* app.options('/users/login', (req, res) => {
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.status(204).send(); // No content needed for preflight response
-});
+}); */
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req, res, next) => {
+/* app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:3001'); // Replace with your frontend's URL
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
-});
+}); */
 
 app.use('/dishes', dishRouter);
 app.use('/leaders', leaderRouter);
 app.use('/promotions', promoRouter);
 app.use('/favorites', favRouter);
 app.use('/comments', commentRouter)
+app.use('/api', paymentRouter)
 app.use('/imageUpload',uploadRouter);
 
 // catch 404 and forward to error handler
