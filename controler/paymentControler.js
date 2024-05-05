@@ -39,7 +39,6 @@ class paymentController {
 
     call_back = async (req, res) => {
         const { paymentID, status } = req.query
-        console.log(req.query)
 
         if (status === 'cancel' || status === 'failure') {
             /* return res.redirect(`http://localhost:5173/error?message=${status}`) */

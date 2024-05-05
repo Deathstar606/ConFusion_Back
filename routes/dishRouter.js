@@ -48,14 +48,28 @@ dishRouter.route('/')
 
 dishRouter.route('/:dishId')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-.get(cors.cors, (req,res,next) => {
-    Dishes.findById(req.params.dishId)
-    .populate('comments.author')
-    .then((dish) => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(dish);
-    }, (err) => next(err))
+.get(cors.cors, (req, res, next) => {
+    Dishes.find({})
+    .then((dishes) => {
+        if (dishes && dishes.length > 0) {
+            console.log("--------------Fuck")
+            const allItems = dishes.flatMap(obj => obj.items); // Flatten the nested items arrays
+            const dish = allItems.find((item) => item._id.toString() === req.params.dishId);
+            if (dish) {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(dish);
+            } else {
+                const err = new Error(`Dish ${req.params.dishId} not found`);
+                err.status = 404;
+                return next(err);
+            }
+        } else {
+            const err = new Error('No dishes found');
+            err.status = 404;
+            return next(err);
+        }
+    })
     .catch((err) => next(err));
 })
 .post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {

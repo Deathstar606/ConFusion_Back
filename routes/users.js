@@ -67,11 +67,20 @@ router.post('/login',cors.corsWithOptions, (req, res, next) => {
         res.setHeader('Content-Type', 'application/json');
         res.json({success: false, status: 'Login Unsuccessful!', err: 'Could not log in user!'});          
       }
-
       var token = authenticate.getToken({_id: req.user._id});
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.json({success: true, status: 'Login Successful!', token: token});
+      User.findOne({_id: req.user._id})
+      .then((user) => {
+        if (user.admin) {
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.json({success: true, admin: true, status: 'Login Successful!', token: token});
+        }
+        else {
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.json({success: true, admin: false, status: 'Login Successful!', token: token});
+        }
+      })
     }); 
   }) (req, res, next);
 });
