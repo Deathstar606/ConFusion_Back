@@ -21,6 +21,7 @@ var promoRouter = require('./routes/promoRouter');
 var favRouter = require('./routes/favouriteRouter');
 var commentRouter = require('./routes/commentRouter')
 var paymentRouter = require('./routes/bikashPaymentRoute');
+var subcribeRouter = require('./routes/newsletter');
 var uploadRouter = require('./routes/uploadRouter');
 
 const mongoose = require('mongoose');
@@ -95,6 +96,7 @@ app.use('/promotions', promoRouter);
 app.use('/favorites', favRouter);
 app.use('/comments', commentRouter)
 app.use('/api', paymentRouter)
+app.use('/subscribe', subcribeRouter)
 app.use('/imageUpload',uploadRouter);
 
 // catch 404 and forward to error handler
