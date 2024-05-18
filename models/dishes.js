@@ -8,7 +8,8 @@ const menuItemSchema = new Schema({
   image: { type: String, required: true },
   category: { type: String, required: true },
   price: { type: Number, required: true, min: 0 },
-  description: { type: String, required: true }
+  description: { type: String, required: true },
+  ingreds: { type: String, required: true },
 }, { timestamps: true });
 
 const DishSchema = new Schema({

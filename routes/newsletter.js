@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const subcribeRouter = express.Router();
 const mailchimp = require('@mailchimp/mailchimp_marketing');
 
