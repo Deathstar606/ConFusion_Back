@@ -14,7 +14,6 @@ commentRouter.route('/')
     .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200);})
     .get(cors.cors, (req, res, next) => {
         Comments.find(req.query)
-            .populate('author')
             .then((comments) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
@@ -22,13 +21,11 @@ commentRouter.route('/')
             }, (err) => next(err))
             .catch((err) => next(err));
     })
-    .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    .post(cors.corsWithOptions, (req, res, next) => {
         if (req.body != null) {
-            req.body.author = req.user._id;
             Comments.create(req.body)
                 .then((comment) => {
                     Comments.findById(comment._id)
-                        .populate('author')
                         .then((comment) => {
                             res.statusCode = 200;
                             res.setHeader('Content-Type', 'application/json');

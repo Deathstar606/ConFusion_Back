@@ -1,29 +1,41 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const subcribeRouter = express.Router();
-const mailchimp = require('@mailchimp/mailchimp_marketing');
+//const ReactDOMServer = require('react-dom/server');
+const nodemailer = require('nodemailer');
 
-mailchimp.setConfig({
-  apiKey: process.env.chimp_apiKey,
-  server: process.env.chimp_server
+const subscribeRouter = express.Router();
+const users = ['dsfardin606@gmail.com'];
+
+subscribeRouter.use(bodyParser.json());
+
+subscribeRouter.post('/', async (req, res) => {
+  const { subject, htmlContent } = req.body;
+
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // Use `true` for port 465
+    auth: {
+      user: "dsfardin606@gmail.com",
+      pass: "mmci qyfw zkny mnmt",
+    },
+  });
+
+  const mailOptions = {
+    from: '"Maddison Fuck Much 👻" <dsfardin606@gmail.com>', // sender address
+    to: users, // list of receivers
+    subject: subject,
+    html: htmlContent
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('Newsletter sent successfully');
+    res.status(200).send('Newsletter sent successfully');
+  } catch (error) {
+    console.error('Failed to send newsletter:', error);
+    res.status(500).send('Failed to send newsletter');
+  }
 });
 
-subcribeRouter.use(bodyParser.json());
-
-subcribeRouter.post('/', async (req, res) => {
-    const { email } = req.body;
-  
-    try {
-      const response = await mailchimp.lists.addListMember('YOUR_AUDIENCE_ID', {  //change YOUR_AUDIENCE_ID
-        email_address: email,
-        status: 'subscribed',
-      });
-      res.status(200).json({ message: 'Success! Check your email to confirm your subscription.' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error subscribing. Please try again later.' });
-    }
-  });
-  
-  module.exports = subcribeRouter;
-
+module.exports = subscribeRouter;
