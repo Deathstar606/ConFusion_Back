@@ -7,16 +7,9 @@
       }
     ],
     "routes": [
-      { "src": "/dishes/(.*)", "dest": "/app.js" },
-      { "src": "/leaders/(.*)", "dest": "/app.js" },
-      { "src": "/promotions/(.*)", "dest": "/app.js" },
-      { "src": "/favorites/(.*)", "dest": "/app.js" },
-      { "src": "/comments/(.*)", "dest": "/app.js" },
-      { "src": "/api/(.*)", "dest": "/app.js" },
-      { "src": "/subscribe/(.*)", "dest": "/app.js" },
-      { "src": "/imageUpload/(.*)", "dest": "/app.js" },
-      { "src": "/users/(.*)", "dest": "/app.js" },
-      { "src": "/payments/(.*)", "dest": "/app.js" },
-      { "src": "/(.*)", "dest": "/app.js" }
-    ]  
+      {
+        "src": "/(.*)",
+        "dest": "/"
+      }
+    ]
   }
