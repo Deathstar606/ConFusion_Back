@@ -68,13 +68,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(passport.initialize());
 
-app.use('/', index);
+app.use('/', dishRouter);
 app.use('/users', users);
 app.use('/payments', payments);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/dishes', dishRouter);
+/* app.use('/dishes', dishRouter); */
 app.use('/leaders', leaderRouter);
 app.use('/promotions', promoRouter);
 app.use('/favorites', favRouter);
