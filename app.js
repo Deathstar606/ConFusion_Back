@@ -38,25 +38,24 @@ connect.then((db) => {
     console.log("Connection OK!");
 }, (err) => { console.log(err); });
 
-const corsOptions = {
+/* const corsOptions = {
   origin: 'http://localhost:3001', // Replace with the origin of your client application
   credentials: true, // Allow sending cookies and other credentials with the request
   optionsSuccessStatus: 200 // Set the successful response status code for preflight requests
-};
-
+}; */
 
 var app = express();
 
-app.use(cors(corsOptions));
+//app.use(cors(corsOptions));
 
-app.all('*', (req, res, next) => {
+/* app.all('*', (req, res, next) => {
   if (req.secure) {
     return next();
   }
   else {
     res.redirect(307, 'https://' + req.hostname + ':' + 3443 + req.url);
   }
-});
+}); */
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -72,20 +71,7 @@ app.use('/', index);
 app.use('/users', users);
 app.use('/payments', payments);
 
-/* app.options('/users/login', (req, res) => {
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.status(204).send(); // No content needed for preflight response
-}); */
-
 app.use(express.static(path.join(__dirname, 'public')));
-
-/* app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3001'); // Replace with your frontend's URL
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-}); */
 
 app.use('/dishes', dishRouter);
 app.use('/leaders', leaderRouter);
