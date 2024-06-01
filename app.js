@@ -38,15 +38,16 @@ connect.then((db) => {
     console.log("Connection OK!");
 }, (err) => { console.log(err); });
 
-/* const corsOptions = {
-  origin: 'http://localhost:3001', // Replace with the origin of your client application
+const corsOptions = {
+  origin: 'https://con-fusion-server-q25n4r9hu-deathstar606s-projects.vercel.app', // Replace with the origin of your client application
   credentials: true, // Allow sending cookies and other credentials with the request
   optionsSuccessStatus: 200 // Set the successful response status code for preflight requests
-}; */
+};
+
 
 var app = express();
 
-//app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 /* app.all('*', (req, res, next) => {
   if (req.secure) {
