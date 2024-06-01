@@ -83,8 +83,12 @@ app.use('/api', paymentRouter)
 app.use('/subscribe', subcribeRouter)
 app.use('/imageUpload',uploadRouter);
 
-const port = process.env.PORT || 9001;
-app.listen(port, () => console.log(`Listening to port ${port}`));
+const http = require('http');
+const server = http.createServer(app);
+server.setTimeout(30000); // 30 seconds
+server.listen(process.env.PORT || 9000, () => {
+  console.log('Server listening on port', process.env.PORT || 9000);
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
