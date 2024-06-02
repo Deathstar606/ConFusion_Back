@@ -39,11 +39,10 @@ connect.then((db) => {
 }, (err) => { console.log(err); });
 
 const corsOptions = {
-  origin: 'http://localhost:3000' || "https://deathstar606.github.io", // Replace with the origin of your client application
+  origin: 'https://deathstar606.github.io' /* || 'http://localhost:3000' */, // Replace with the origin of your client application
   credentials: true, // Allow sending cookies and other credentials with the request
   optionsSuccessStatus: 200 // Set the successful response status code for preflight requests
 };
-
 
 var app = express();
 
