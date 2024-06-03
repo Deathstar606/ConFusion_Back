@@ -13,6 +13,7 @@ require('dotenv').config();
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var subcribers = require('./routes/subscribe');
 var payments = require('./routes/paymentRouter');
 
 var dishRouter = require('./routes/dishRouter');
@@ -21,7 +22,7 @@ var promoRouter = require('./routes/promoRouter');
 var favRouter = require('./routes/favouriteRouter');
 var commentRouter = require('./routes/commentRouter')
 var paymentRouter = require('./routes/bikashPaymentRoute');
-var subcribeRouter = require('./routes/newsletter');
+var newsRouter = require('./routes/newsletter');
 var uploadRouter = require('./routes/uploadRouter');
 
 const mongoose = require('mongoose');
@@ -39,10 +40,18 @@ connect.then((db) => {
 }, (err) => { console.log(err); });
 
 const corsOptions = {
-  origin: 'https://deathstar606.github.io' /* || 'http://localhost:3000' */, // Replace with the origin of your client application
+  origin: (origin, callback) => {
+    const allowedOrigins = ['https://deathstar606.github.io', 'http://localhost:3000'];
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true, // Allow sending cookies and other credentials with the request
   optionsSuccessStatus: 200 // Set the successful response status code for preflight requests
 };
+
 
 var app = express();
 
@@ -69,6 +78,7 @@ app.use(passport.initialize());
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/subscribe', subcribers);
 app.use('/payments', payments);
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -79,7 +89,7 @@ app.use('/promotions', promoRouter);
 app.use('/favorites', favRouter);
 app.use('/comments', commentRouter)
 app.use('/api', paymentRouter)
-app.use('/subscribe', subcribeRouter)
+app.use('/sendnews', newsRouter)
 app.use('/imageUpload',uploadRouter);
 
 const http = require('http');
