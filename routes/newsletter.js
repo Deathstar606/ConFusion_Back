@@ -1,15 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-//const ReactDOMServer = require('react-dom/server');
 const nodemailer = require('nodemailer');
 
 const subscribeRouter = express.Router();
-const users = ['dsfardin606@gmail.com'];
 
 subscribeRouter.use(bodyParser.json());
 
 subscribeRouter.post('/', async (req, res) => {
-  const { subject, htmlContent } = req.body;
+  const { subject, htmlContent, email } = req.body;
 
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -23,7 +21,7 @@ subscribeRouter.post('/', async (req, res) => {
 
   const mailOptions = {
     from: '"Maddison Fuck Much 👻" <dsfardin606@gmail.com>', // sender address
-    to: users, // list of receivers
+    to: email, // list of receivers
     subject: subject,
     html: htmlContent
   };
