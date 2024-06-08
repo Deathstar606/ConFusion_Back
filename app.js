@@ -14,6 +14,7 @@ require('dotenv').config();
 var index = require('./routes/index');
 var users = require('./routes/users');
 var subcribers = require('./routes/subscribe');
+var reservations = require('./routes/reservationRouter');
 var payments = require('./routes/paymentRouter');
 
 var dishRouter = require('./routes/dishRouter');
@@ -79,6 +80,7 @@ app.use(passport.initialize());
 app.use('/', index);
 app.use('/users', users);
 app.use('/subscribe', subcribers);
+app.use('/reservation', reservations);
 app.use('/payments', payments);
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -94,7 +96,7 @@ app.use('/imageUpload',uploadRouter);
 
 const http = require('http');
 const server = http.createServer(app);
-server.setTimeout(30000); // 30 seconds
+server.setTimeout(10000); // 10 seconds
 server.listen(process.env.PORT || 9000, () => {
   console.log('Server listening on port', process.env.PORT || 9000);
 });
