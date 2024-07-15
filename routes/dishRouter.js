@@ -1,10 +1,24 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const cors = require('./cors');
 
 const Dishes = require('../models/dishes');
 var authenticate = require('../authenticate');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'public/images');
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname)); // Appending extension
+    }
+});
+
+const upload = multer({ storage: storage });
 
 const dishRouter = express.Router();
 
@@ -22,7 +36,7 @@ dishRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.post(cors.corsWithOptions, /* authenticate.verifyUser, authenticate.verifyAdmin,  */(req, res, next) => {
     Dishes.create(req.body)
     .then((dish) => {
         console.log('Dish Created ', dish);
@@ -32,18 +46,118 @@ dishRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.delete(cors.corsWithOptions, async (req, res, next) => {
+    const { _id } = req.body;
+    try {
+        const deletedCategory = await Dishes.findOneAndRemove({ _id: _id });
+
+        if (!deletedCategory) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        res.status(200).json(deletedCategory);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+})
+/* .put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /dishes');
 })
-.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
-    Dishes.remove({})
-    .then((resp) => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(resp);
-    }, (err) => next(err))
-    .catch((err) => next(err));    
+*/
+
+dishRouter.route('/addDish')
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.post(upload.single('image'), cors.corsWithOptions, /* authenticate.verifyUser, authenticate.verifyAdmin, */ async (req, res) => {
+    const { category, name, ingreds, description, price } = req.body;
+    let imagePath = req.file ? req.file.path : '';
+    imagePath = imagePath.replace(/^public[\/\\]/, '');
+    const dish = {
+      _id: new mongoose.Types.ObjectId(),
+      name,
+      ingreds,
+      description,
+      price,
+      image: imagePath,
+      createdAt: new Date()
+    };
+  
+    try {
+      const updatedCategory = await Dishes.findOneAndUpdate(
+        { name: category },
+        { $push: { items: dish } },
+        { new: true, upsert: true }
+      );
+  
+      res.status(200).json(updatedCategory);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+})
+.put(cors.corsWithOptions, upload.single('image'), async (req, res) => {
+    const { category, _id, ...updateFields } = req.body;
+    try {
+        const dish = await Dishes.findOne({ name: category, 'items._id': mongoose.Types.ObjectId(_id) });
+        if (!dish) {
+            return res.status(404).json({ message: 'Category or item not found' });
+        }
+
+        const itemIndex = dish.items.findIndex(item => item._id.toString() === _id);
+        if (itemIndex === -1) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+
+        const oldImagePath = path.join('public', dish.items[itemIndex].image);
+        
+        if (req.file) {
+            newImgPath = req.file.path;
+            updateFields['image'] = newImgPath.replace(/^public[\/\\]/, '');
+        }
+
+        const updatedDish = await Dishes.findOneAndUpdate(
+            { name: category, 'items._id': mongoose.Types.ObjectId(_id) },
+            { $set: Object.keys(updateFields).reduce((acc, key) => {
+                acc[`items.$[elem].${key}`] = updateFields[key];
+                return acc;
+            }, {}) },
+            { arrayFilters: [{ 'elem._id': mongoose.Types.ObjectId(_id) }], new: true }
+        );
+
+        if (!updatedDish) {
+            return res.status(404).json({ message: 'Category or item not found after update' });
+        }
+
+        if (req.file && oldImagePath && fs.existsSync(oldImagePath)) {
+            fs.unlink(oldImagePath, (err) => {
+                if (err) {
+                    console.error('Error deleting old image:', err);
+                }
+            });
+        }
+
+        res.status(200).json(updatedDish);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+})
+.delete(cors.corsWithOptions, /* authenticate.verifyUser, authenticate.verifyAdmin, */ async (req, res) => {
+    const { category, _id } = req.body;
+    console.log(category, _id)
+    try {
+        const updatedCategory = await Dishes.findOneAndUpdate(
+            { name: category },
+            { $pull: { items: { _id: mongoose.Types.ObjectId(_id) } } },
+            { new: true }
+        );
+    
+        if (!updatedCategory) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        res.status(200).json(updatedCategory);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
 
 dishRouter.route('/:dishId')
@@ -52,7 +166,6 @@ dishRouter.route('/:dishId')
     Dishes.find({})
     .then((dishes) => {
         if (dishes && dishes.length > 0) {
-            console.log("--------------Fuck")
             const allItems = dishes.flatMap(obj => obj.items); // Flatten the nested items arrays
             const dish = allItems.find((item) => item._id.toString() === req.params.dishId);
             if (dish) {
