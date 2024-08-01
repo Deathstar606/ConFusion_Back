@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const menuItemSchema = new Schema({
   label: { type: String, default: '' },
-  featured: { type: Boolean, default: false },
+  availability: { type: Boolean, default: true },
   name: { type: String, required: true },
   image: { type: String, required: true },
   category: { type: String, required: true },
@@ -14,6 +14,7 @@ const menuItemSchema = new Schema({
 
 const DishSchema = new Schema({
   name: { type: String, required: true },
+  cat_img: { type: String, required: true },
   items: [menuItemSchema]
 });
 

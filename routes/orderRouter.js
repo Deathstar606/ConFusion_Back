@@ -10,7 +10,7 @@ const ordRouter = express.Router();
 
 const store_id = "demo667d30040fbc3";
 const store_passwd = "demo667d30040fbc3@ssl";
-const is_live = false; // true for live, false for sandbox
+const is_live = false;
 
 ordRouter.use(bodyParser.json());
 
@@ -18,6 +18,7 @@ ordRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req,res,next) => {
     Orders.find(req.query)
+    .sort({ _id: -1 })  // Sorting the orders by _id in descending order
     .then((orders) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -96,6 +97,7 @@ ordRouter.route('/sslpay')
             address: order.address,
             email: order.email,
             order_type: order.order_type,
+            gift_stat: order.gift_stat,
             phoneNumber: order.phoneNumber,
             total: order.total,
             items: order.items,

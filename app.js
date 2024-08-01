@@ -13,6 +13,12 @@ var subcribers = require('./routes/subscribe');
 var reservations = require('./routes/reservationRouter');
 var home = require('./routes/homeRouter');
 var gifts = require('./routes/giftRouter');
+var giftCase = require("./routes/giftcaseRouter")
+var headers = require('./routes/headerRouter')
+var events = require('./routes/eventRouter')
+var loactions = require('./routes/locationRouter')
+var gallery = require('./routes/galleryRouter')
+var caterMenu = require("./routes/caterRouter")
 var orders = require('./routes/orderRouter');
 
 var dishRouter = require('./routes/dishRouter');
@@ -30,6 +36,7 @@ mongoose.set('useCreateIndex', true);
 
 // Connection URL
 const url = config.mongoUrl;
+console.log(url)
 const connect = mongoose.connect(url, 
   { useNewUrlParser: true, 
     useUnifiedTopology: true });
@@ -72,6 +79,12 @@ app.use('/subscribe', subcribers);
 app.use('/reservation', reservations);
 app.use('/home', home);
 app.use('/gifts', gifts);
+app.use('/giftcase', giftCase);
+app.use('/headers', headers);
+app.use('/locations', loactions);
+app.use('/events', events)
+app.use('/gallery', gallery);
+app.use('/catermenu', caterMenu)
 app.use('/orders', orders);
 
 app.use(express.static(path.join(__dirname, 'public')));

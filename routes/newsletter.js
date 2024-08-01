@@ -8,6 +8,7 @@ subscribeRouter.use(bodyParser.json());
 
 subscribeRouter.post('/', async (req, res) => {
   const { subject, htmlContent, email } = req.body;
+  console.log('Received email request:', { subject, email }); // Debug log
 
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",

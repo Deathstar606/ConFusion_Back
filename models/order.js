@@ -8,6 +8,7 @@ const OrderSchema = new Schema({
   email: { type: String, required: true },
   order_type: { type: String, required: true },
   order_stat: { type: Boolean, default: false },
+  gift_stat: { type: Boolean, default: false },
   phoneNumber: { type: String, required: true },
   total: { type: Number, required: true },
   payment_stat: { type: Boolean, default: false, required: true },

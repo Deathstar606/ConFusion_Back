@@ -9,7 +9,7 @@ const cors = require('./cors');
 const Dishes = require('../models/dishes');
 var authenticate = require('../authenticate');
 
-const storage = multer.diskStorage({
+const storageD = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'public/images');
     },
@@ -18,7 +18,17 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage });
+const storageC = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'public/images/Category');
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname)); // Appending extension
+    }
+});
+
+const uploadDish = multer({ storage: storageD });
+const uploadCat = multer({ storage: storageC });
 
 const dishRouter = express.Router();
 
@@ -36,15 +46,24 @@ dishRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post(cors.corsWithOptions, /* authenticate.verifyUser, authenticate.verifyAdmin,  */(req, res, next) => {
-    Dishes.create(req.body)
-    .then((dish) => {
-        console.log('Dish Created ', dish);
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(dish);
-    }, (err) => next(err))
-    .catch((err) => next(err));
+.post(uploadCat.single('image'), cors.corsWithOptions, /* authenticate.verifyUser, authenticate.verifyAdmin,  */ async (req, res, next) => {
+    const { name } = req.body;
+    let imagePath = req.file ? req.file.path : '';
+    imagePath = imagePath.replace(/^public[\/\\]/, '');
+    const dish = {
+      image: imagePath,
+      name: name,
+    };
+    try {
+        console.log(dish)
+        const updatedCaterMenu = await Dishes.create(
+            dish
+        );
+  
+      res.status(200).json(updatedCaterMenu);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
 })
 .delete(cors.corsWithOptions, async (req, res, next) => {
     const { _id } = req.body;
@@ -68,7 +87,7 @@ dishRouter.route('/')
 
 dishRouter.route('/addDish')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-.post(upload.single('image'), cors.corsWithOptions, /* authenticate.verifyUser, authenticate.verifyAdmin, */ async (req, res) => {
+.post(uploadDish.single('image'), cors.corsWithOptions, /* authenticate.verifyUser, authenticate.verifyAdmin, */ async (req, res) => {
     const { category, name, ingreds, description, price } = req.body;
     let imagePath = req.file ? req.file.path : '';
     imagePath = imagePath.replace(/^public[\/\\]/, '');
@@ -94,7 +113,7 @@ dishRouter.route('/addDish')
       res.status(500).json({ message: error.message });
     }
 })
-.put(cors.corsWithOptions, upload.single('image'), async (req, res) => {
+.put(cors.corsWithOptions, uploadDish.single('image'), async (req, res) => {
     const { category, _id, ...updateFields } = req.body;
     try {
         const dish = await Dishes.findOne({ name: category, 'items._id': mongoose.Types.ObjectId(_id) });
@@ -154,6 +173,22 @@ dishRouter.route('/addDish')
             return res.status(404).json({ message: 'Category not found' });
         }
 
+        res.status(200).json(updatedCategory);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+dishRouter.route('/avail')
+.post(cors.corsWithOptions, /* authenticate.verifyUser, authenticate.verifyAdmin, */ async (req, res) => {
+    const { name, _id, availability } = req.body;
+    try {
+        const updatedCategory = await Dishes.findOneAndUpdate(
+            { name: name, "items._id": _id }, // Query to match category name and dish ID
+            { $set: { "items.$.availability": availability } }, // Update the availability field
+            { new: true, upsert: true } // Return the updated document
+        );
+  
         res.status(200).json(updatedCategory);
     } catch (error) {
         res.status(500).json({ message: error.message });

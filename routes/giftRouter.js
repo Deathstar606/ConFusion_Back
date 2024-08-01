@@ -23,12 +23,12 @@ giftRouter.route('/')
     .catch((err) => next(err));
 })
 .post(cors.cors, async (req, res, next) => {
-    const { _id } = req.body;
+    const { trans_id } = req.body;
     try {
-        const selectedGift = await Gifts.findOne({ _id: _id });
+        const selectedGift = await Gifts.findOne({ transaction_id: trans_id });
         if (selectedGift) {
             const giftValue = selectedGift.value;
-            await Gifts.deleteOne({ _id: _id }); // Delete the gift card after it's used
+            await Gifts.deleteOne({ transaction_id: trans_id }); // Delete the gift card after it's used
             res.status(200).json({ value: giftValue });
         } else {
             res.status(404).send('Gift card not found');
@@ -43,11 +43,12 @@ giftRouter.route('/sslpay')
 .post(cors.cors, async (req, res, next) => {
     try {
         let gift = req.body;
-        let value = req.body.value
+        console.log(gift)
+        let value = req.body.total
         let email = req.body.email
-        const trans_id = new mongoose.Types.ObjectId().toString();
+        const trans_id = new mongoose.Types.ObjectId().toString().slice(-6);
         const data = {
-            total_amount: gift.total,
+            total_amount: value,
             currency: 'BDT',
             tran_id: trans_id,
             success_url: `http://localhost:9000/gifts/success/${trans_id}/${value}/${email}`,
@@ -84,7 +85,6 @@ giftRouter.route('/sslpay')
         const finalGift = {
             email: gift.email,
             value: gift.value,
-            quantity: gift.quantity,
             phoneNumber: gift.phoneNumber,
             total: gift.total,
             transaction_id: trans_id
@@ -118,7 +118,7 @@ giftRouter.route('/success/:tranId/:value/:email')
             res.json({ message: 'Transaction not found' });
             return;
         }
-        res.redirect(`http://localhost:3000/ConFusion_Front#/paystat/${transactionId}/${value}/${email}`);
+        res.redirect(`http://localhost:3000/ConFusion_Front#/gift/${transactionId}/${value}/${email}`);
     } catch (err) {
         console.error("Error processing payment success callback: ", err);
         next(err);
