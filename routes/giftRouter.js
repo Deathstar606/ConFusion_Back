@@ -52,7 +52,7 @@ giftRouter.route('/sslpay')
             currency: 'BDT',
             tran_id: trans_id,
             success_url: `http://localhost:9000/gifts/success/${trans_id}/${value}/${email}`,
-            fail_url: 'http://localhost:3030/fail',
+            fail_url: `http://localhost:9000/gifts/failure/${trans_id}`,
             cancel_url: 'http://localhost:3030/cancel',
             ipn_url: 'http://localhost:3030/ipn',
             shipping_method: 'Courier',
@@ -121,6 +121,27 @@ giftRouter.route('/success/:tranId/:value/:email')
         res.redirect(`http://localhost:3000/ConFusion_Front#/gift/${transactionId}/${value}/${email}`);
     } catch (err) {
         console.error("Error processing payment success callback: ", err);
+        next(err);
+    }
+});
+
+giftRouter.route('/failure/:tranId')
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.post(cors.corsWithOptions, async (req, res, next) => {
+    try {
+        const transactionId = req.params.tranId;
+        const result = await Gifts.deleteOne({ transaction_id: transactionId });
+
+        if (result.deletedCount === 0) {
+            console.log("Transaction not found for ID: ", transactionId);
+            res.statusCode = 404;
+            res.setHeader('Content-Type', 'application/json');
+            res.json({ message: 'Transaction not found' });
+            return;
+        }
+        res.redirect(`http://localhost:3000/ConFusion_Front#/payfail/${transactionId}`);
+    } catch (err) {
+        console.error("Error processing payment failure callback: ", err);
         next(err);
     }
 });
