@@ -47,7 +47,7 @@ connect.then((db) => {
 
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = ['https://deathstar606.github.io', 'http://localhost:3000', 'null'];
+    const allowedOrigins = ['https://deathstar606.github.io'/* , 'http://localhost:3000', 'null' */];
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
       console.log("allowed origin: ", origin);
       callback(null, true);
