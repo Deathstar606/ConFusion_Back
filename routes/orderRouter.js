@@ -60,7 +60,7 @@ ordRouter.route('/sslpay')
             total_amount: order.total,
             currency: 'BDT',
             tran_id: trans_id,
-            success_url: `https://con-fusion-back.vercel.app/orders/success/${trans_id}`,
+            success_url: `https://con-fusion-back.vercel.app/orders/success/${trans_id}`, //http://localhost:9000/
             fail_url: 'http://localhost:3030/fail',
             cancel_url: 'http://localhost:3030/cancel',
             ipn_url: 'http://localhost:3030/ipn',
@@ -183,7 +183,7 @@ ordRouter.route('/success/:tranId')
             res.json({ message: 'Transaction not found' });
             return;
         }
-        res.redirect(`https://deathstar606.github.io/ConFusion_Front#/paystat/${transactionId}`);
+        res.redirect(`https://deathstar606.github.io/ConFusion_Front#/paystat/${transactionId}`);  //http://localhost:3000/
     } catch (err) {
         console.error("Error processing payment success callback: ", err);
         next(err);
